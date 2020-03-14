@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
+    "generate": "rm -rf dist && mkdir dist && yarn build >> dist/data.js && vim dist/data.js",
     "build": "node index.js"
   },
   "author": "",
