@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "got": "^10.6.0"
+    "got": "^10.6.0",
+    "moment": "^2.24.0",
+    "sleep": "^6.1.0"
   }
 }

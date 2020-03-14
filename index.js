@@ -18,57 +18,60 @@
  */
 
 const got = require('got');
-
+const moment = require('moment');
+var { sleep } = require('sleep');
 const API = `https://covid19.mathdro.id/api/daily/`;
+const DATE_FORMAT = 'DD-MM-YYYY';
 
 const proccess = async () => {
-	const current = {
-		day: 2,
-		month: 1,
-		year: 2020,
-	};
-	const today = {
-		day: 14,
-		month: 3,
-		year: 2020,
-	};
+	let current = moment('2020-01-02');
+	const today = moment();
 	const result = {};
 
-	//while(current.day !== today.day && current.month !== today.month) {
+	while (current <= today) {
+		await sleep(1);
+		const currentDate = current.format(DATE_FORMAT);
+		const endpoint = `${API}${currentDate}`;
+		let data;
+		try {
+			data = await got(endpoint);
+			data = await JSON.parse(data.body);
+		} catch (e) {
+			data = [];
+		}
 
-	const currentDate = `${current.day}-${current.month}-${current.year}`;
-	let data = await got(`${API}${currentDate}`);
-	data = await JSON.parse(data.body);
+		data.forEach(async region => {
+			let resultCountryRegion = result[region.countryRegion];
 
-	data.forEach(region => {
-		let resultCountryRegion = result[region.countryRegion];
+			if (resultCountryRegion) {
+				let currentDateDataForCountry =
+					result[region.countryRegion][currentDate];
 
-		if (resultCountryRegion) {
-			let currentDateDataForCountry = result[region.countryRegion][currentDate];
-
-			if (currentDateDataForCountry) {
-				currentDateDataForCountry.confirmed += parseInt(region.confirmed);
-				currentDateDataForCountry.recovered += parseInt(region.recovered);
-				currentDateDataForCountry.deaths += parseInt(region.deaths);
+				if (currentDateDataForCountry) {
+					currentDateDataForCountry.confirmed += parseInt(region.confirmed);
+					currentDateDataForCountry.recovered += parseInt(region.recovered);
+					currentDateDataForCountry.deaths += parseInt(region.deaths);
+				} else {
+					currentDateDataForCountry = {
+						confirmed: parseInt(region.confirmed),
+						recovered: parseInt(region.recovered),
+						deaths: parseInt(region.deaths),
+					};
+				}
 			} else {
-				currentDateDataForCountry = {
+				result[region.countryRegion] = {};
+				result[region.countryRegion][currentDate] = {
 					confirmed: parseInt(region.confirmed),
 					recovered: parseInt(region.recovered),
 					deaths: parseInt(region.deaths),
 				};
 			}
-		} else {
-			result[region.countryRegion] = {};
-			result[region.countryRegion][currentDate] = {
-				confirmed: parseInt(region.confirmed),
-				recovered: parseInt(region.recovered),
-				deaths: parseInt(region.deaths),
-			};
-		}
-	});
+		});
 
-	console.log(JSON.stringify(result));
-	//}
+		current.add(1, 'd');
+  }
+
+  console.log(result);
 };
 
 proccess();
