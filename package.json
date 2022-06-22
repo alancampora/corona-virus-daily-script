@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "got": "^10.6.0",
+    "got": "^11.8.5",
     "moment": "^2.24.0",
     "sleep": "^6.1.0"
   }
